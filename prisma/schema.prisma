@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id       String @id @default(cuid())
+  name     String?
+  email    String @unique
+  password String
+  role     Role   @default(USER)
+  idCards  IdCard[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model IdCard {
+  id           String   @id @default(cuid())
+  name         String
+  address      String
+  area         String
+  mobileNo     String
+  state        String
+  constituency String
+  membershipNo String   @unique
+  photoUrl     String   
+
+  qrCode       QrCode?  
+  
+  createdBy    User     @relation(fields: [creatorId], references: [id])
+  creatorId    String
+  
+  createdAt    DateTime @default(now())
+}
+
+model QrCode {
+  id         String   @id @default(cuid())
+  qrIdNo     String   @unique
+  qrImageUrl String   
+  
+  idCard     IdCard   @relation(fields: [idCardId], references: [id], onDelete: Cascade)
+  idCardId   String   @unique
+}
