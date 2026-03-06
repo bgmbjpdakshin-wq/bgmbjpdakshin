@@ -32,7 +32,7 @@ export default async function IdCardsListPage({
         : {}
     
 
-    const [idCards, totalCards] = await Promise.all([
+    const [idCards, totalCards] = (await Promise.all([
         prisma.idCard.findMany({
             where,
             orderBy: { createdAt: "desc" },
@@ -46,7 +46,7 @@ export default async function IdCardsListPage({
             },
         }),
         prisma.idCard.count({ where }),
-    ])
+    ])) as [any[], number]
 
     const totalPages = Math.ceil(totalCards / ITEMS_PER_PAGE)
 
@@ -237,7 +237,7 @@ export default async function IdCardsListPage({
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {idCards.map((card) => (
+                                    {idCards.map((card :  any) => (
                                         <tr key={card.id}>
                                             <td><img src={card.photoUrl} alt={card.name} className="row-photo" /></td>
                                             <td>
@@ -295,7 +295,7 @@ export default async function IdCardsListPage({
 
             {/* PRINT LAYOUT (Hidden on screen, visible on print) */}
             <div className="print-layout">
-                {chunkedIdCards.map((pageCards, pageIdx) => (
+                {chunkedIdCards.map((pageCards: any[], pageIdx: number) => (
                     <div className="print-page" key={pageIdx}>
                         {pageCards.map(card => (
                             <div className="print-row" key={`print-${card.id}`}>
