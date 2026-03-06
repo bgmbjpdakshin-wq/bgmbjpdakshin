@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useRef, useCallback, useEffect } from "react"
+import { useState, useRef, useCallback, useEffect, Suspense } from "react"
 import Webcam from "react-webcam"
 import { createIdCard } from "@/app/actions/idcard"
 import { useRouter, useSearchParams } from "next/navigation"
 import { getIdCardById, updateIdCard } from "@/app/actions/idcard"
 
-export default function NewIdCardPage() {
+function NewIdCardForm() {
   const router = useRouter()
   const webcamRef = useRef<Webcam>(null)
   const searchParams = useSearchParams()
@@ -539,5 +539,13 @@ export default function NewIdCardPage() {
         </div>
       </div>
     </>
+  )
+}
+
+export default function NewIdCardPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 40, fontFamily: 'monospace' }}>Loading page...</div>}>
+      <NewIdCardForm />
+    </Suspense>
   )
 }
