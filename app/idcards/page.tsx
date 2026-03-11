@@ -302,7 +302,7 @@ export default async function IdCardsListPage({
                                 {/* Front Card */}
                                 <div className="card-box front">
                                     {/* USE STANDARD IMG TAG HERE */}
-                                    <img src="/Id_Card_Format/card-front.png" className="card-bg" alt="" />
+                                    <img src="/ID_Card_Format/card-front.png" className="card-bg" alt="" />
 
                                     <span className="val-name">{card.name}</span>
                                     <span className="val-member">{card.membershipNo}</span>
@@ -312,7 +312,7 @@ export default async function IdCardsListPage({
                                 {/* Back Card */}
                                 <div className="card-box back">
                                     {/* USE STANDARD IMG TAG HERE */}
-                                    <img src="/Id_Card_Format/card-back.png" className="card-bg" alt="" />
+                                    <img src="/ID_Card_Format/card-back.png" className="card-bg" alt="" />
 
                                     <span className="val-b-name">{card.name}</span>
                                     <span className="val-b-address">
