@@ -13,7 +13,6 @@ function NewIdCardForm() {
   const editId = searchParams.get("edit")
 
   const [imgSrc, setImgSrc] = useState<string | null>(null)
-  const [facingMode, setFacingMode] = useState<"user" | "environment">("user")
   const [isLoading, setIsLoading] = useState(false)
   const [isFetching, setIsFetching] = useState(!!editId)
   const [error, setError] = useState("")
@@ -51,11 +50,6 @@ function NewIdCardForm() {
     const imageSrc = webcamRef.current?.getScreenshot()
     if (imageSrc) setImgSrc(imageSrc)
   }, [webcamRef])
-
-  const toggleCamera = useCallback((e: React.MouseEvent) => {
-    e.preventDefault()
-    setFacingMode((prev) => (prev === "user" ? "environment" : "user"))
-  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormDataState({ ...formDataState, [e.target.name]: e.target.value })
@@ -104,7 +98,7 @@ function NewIdCardForm() {
             transparent, transparent 27px,
             rgba(0,0,0,0.04) 27px, rgba(0,0,0,0.04) 28px
           );
-          padding: 28px 18px;
+          padding: 40px 24px;
           font-family: 'Courier Prime', 'Courier New', monospace;
         }
 
@@ -116,8 +110,8 @@ function NewIdCardForm() {
         /* ── Page heading ── */
         .newid-page-header {
           border-bottom: 2px solid #3a2e22;
-          padding-bottom: 12px;
-          margin-bottom: 24px;
+          padding-bottom: 14px;
+          margin-bottom: 28px;
         }
 
         .newid-eyebrow {
@@ -177,7 +171,7 @@ function NewIdCardForm() {
         }
 
         .newid-panel-body {
-          padding: 18px 18px 20px;
+          padding: 20px 20px 22px;
         }
 
         /* ── Webcam / photo ── */
@@ -214,7 +208,6 @@ function NewIdCardForm() {
           display: flex;
           gap: 10px;
           margin-top: 14px;
-          flex-wrap: wrap;
         }
 
         .btn-capture {
@@ -254,25 +247,6 @@ function NewIdCardForm() {
         }
 
         .btn-retake:hover {
-          background-color: #ddd5c0;
-        }
-
-        .btn-switch-cam {
-          flex: 1;
-          background-color: transparent;
-          color: #3a2e22;
-          border: 2px solid #3a2e22;
-          padding: 9px 12px;
-          font-family: 'Courier Prime', monospace;
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: background-color 0.15s;
-        }
-
-        .btn-switch-cam:hover {
           background-color: #ddd5c0;
         }
 
@@ -409,7 +383,6 @@ function NewIdCardForm() {
                       audio={false}
                       ref={webcamRef}
                       screenshotFormat="image/jpeg"
-                      videoConstraints={{ facingMode }}
                       style={{ width: "100%", height: "100%", objectFit: "cover" }}
                     />
                   ) : (
@@ -418,21 +391,12 @@ function NewIdCardForm() {
                 </div>
                 <div className="newid-cam-btns">
                   {!imgSrc ? (
-                    <>
-                      <button
-                        className="btn-capture"
-                        onClick={(e) => { e.preventDefault(); capture(); }}
-                      >
-                        ◉ &nbsp;Capture Photo
-                      </button>
-                      <button
-                        className="btn-switch-cam"
-                        onClick={toggleCamera}
-                        title="Switch Camera"
-                      >
-                        ⇄ &nbsp;Switch Cam
-                      </button>
-                    </>
+                    <button
+                      className="btn-capture"
+                      onClick={(e) => { e.preventDefault(); capture(); }}
+                    >
+                      ◉ &nbsp;Capture Photo
+                    </button>
                   ) : (
                     <button
                       className="btn-retake"

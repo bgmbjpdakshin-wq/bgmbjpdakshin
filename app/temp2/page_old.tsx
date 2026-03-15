@@ -12,6 +12,9 @@ export default async function IdCardsListPage({
 }: {
     searchParams: Promise<{ query?: string; page?: string }> 
 }) {
+    const session = await auth()
+    if (!session) redirect("/login")
+
     const resolvedParams = await searchParams
     const query = resolvedParams?.query || ""
     const currentPage = Number(resolvedParams?.page) || 1
@@ -28,59 +31,22 @@ export default async function IdCardsListPage({
           }
         : {}
     
-    const hasDatabase = !!process.env.DATABASE_URL
 
-    let idCards: any[] = []
-    let totalCards = 0
-
-    if (hasDatabase) {
-        const [realIdCards, realTotalCards] = (await Promise.all([
-            prisma.idCard.findMany({
-                where,
-                orderBy: { membershipNo: "asc" },
-                skip: (currentPage - 1) * ITEMS_PER_PAGE,
-                take: ITEMS_PER_PAGE,
-                include: {
-                    qrCode: true,
-                    createdBy: {
-                        select: { name: true, email: true },
-                    },
+    const [idCards, totalCards] = (await Promise.all([
+        prisma.idCard.findMany({
+            where,
+            orderBy: { createdAt: "desc" },
+            skip: (currentPage - 1) * ITEMS_PER_PAGE,
+            take: ITEMS_PER_PAGE,
+            include: {
+                qrCode: true,
+                createdBy: {
+                    select: { name: true, email: true },
                 },
-            }),
-            prisma.idCard.count({ where }),
-        ])) as [any[], number]
-
-        idCards = realIdCards
-        totalCards = realTotalCards
-    } else {
-        idCards = [
-            {
-                id: "sample-1",
-                name: "Sample Member One",
-                address: "Sample Street 1",
-                area: "Sample Area",
-                mobileNo: "9999999999",
-                state: "Sample State",
-                constituency: "Sample Constituency",
-                membershipNo: "1001",
-                photoUrl: "/Id_Card_Format/card-front.png",
-                qrCode: null,
             },
-            {
-                id: "sample-2",
-                name: "Sample Member Two",
-                address: "Sample Street 2",
-                area: "Sample Area",
-                mobileNo: "8888888888",
-                state: "Sample State",
-                constituency: "Sample Constituency",
-                membershipNo: "1002",
-                photoUrl: "/Id_Card_Format/card-front.png",
-                qrCode: null,
-            },
-        ]
-        totalCards = idCards.length
-    }
+        }),
+        prisma.idCard.count({ where }),
+    ])) as [any[], number]
 
     const totalPages = Math.ceil(totalCards / ITEMS_PER_PAGE)
 
@@ -106,11 +72,11 @@ export default async function IdCardsListPage({
                         rgba(0,0,0,0.04) 27px,
                         rgba(0,0,0,0.04) 28px
                     );
-                    padding: 24px 16px;
+                    padding: 40px 24px;
                     font-family: 'Courier Prime', 'Courier New', monospace;
                 }
                 .idlist-inner { max-width: 960px; margin: 0 auto; }
-                .idlist-header { display: flex; align-items: flex-end; justify-content: space-between; border-bottom: 2px solid #3a2e22; padding-bottom: 16px; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+                .idlist-header { display: flex; align-items: flex-end; justify-content: space-between; border-bottom: 2px solid #3a2e22; padding-bottom: 16px; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
                 .idlist-eyebrow { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #7a6a52; margin-bottom: 4px; }
                 .idlist-title { font-family: 'IM Fell English', Georgia, serif; font-size: 28px; color: #1e1710; line-height: 1.1; }
                 .idlist-count { font-size: 11px; color: #7a6a52; margin-top: 4px; letter-spacing: 0.08em; }
@@ -123,7 +89,7 @@ export default async function IdCardsListPage({
                 .idlist-table thead th { padding: 11px 14px; text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #c8b89a; white-space: nowrap; }
                 .idlist-table tbody tr { border-bottom: 1px solid #d4c9b4; }
                 .idlist-table tbody tr:hover { background-color: #ece4d4; }
-                .idlist-table tbody td { padding: 10px 10px; color: #2a1e12; vertical-align: middle; }
+                .idlist-table tbody td { padding: 11px 14px; color: #2a1e12; vertical-align: middle; }
                 .row-photo { width: 40px; height: 40px; object-fit: cover; border: 1px solid #3a2e22; display: block; }
                 .row-name { font-family: 'IM Fell English', Georgia, serif; font-size: 15px; color: #1e1710; }
                 .row-membership { font-size: 11px; color: #7a6a52; letter-spacing: 0.06em; margin-top: 1px; }
@@ -154,55 +120,6 @@ export default async function IdCardsListPage({
                 /* Hide Print Layout on Screen */
                 @media screen {
                     .print-layout { display: none; }
-                }
-
-                /* ── Mobile adjustments ── */
-                @media (max-width: 640px) {
-                    .idlist-root {
-                        padding: 16px 10px;
-                    }
-                    .idlist-header {
-                        flex-direction: column;
-                        align-items: flex-start;
-                        gap: 8px;
-                    }
-                    .header-actions {
-                        width: 100%;
-                        justify-content: flex-start;
-                        flex-wrap: wrap;
-                    }
-                    .idlist-title {
-                        font-size: 22px;
-                    }
-                    .idlist-table-wrap {
-                        border-width: 1px;
-                        box-shadow: 3px 3px 0 #3a2e22;
-                    }
-                    table.idlist-table {
-                        font-size: 11px;
-                    }
-                    .idlist-table thead th {
-                        padding: 8px 6px;
-                        font-size: 9px;
-                    }
-                    .idlist-table tbody td {
-                        padding: 8px 6px;
-                    }
-                    .row-photo {
-                        width: 32px;
-                        height: 32px;
-                    }
-                    .row-name {
-                        font-size: 13px;
-                    }
-                    .row-membership {
-                        font-size: 10px;
-                    }
-                    .pagination {
-                        flex-direction: column;
-                        align-items: flex-start;
-                        gap: 8px;
-                    }
                 }
 
                 /* ── Print Layout Styles ── */
@@ -380,52 +297,33 @@ export default async function IdCardsListPage({
             <div className="print-layout">
                 {chunkedIdCards.map((pageCards: any[], pageIdx: number) => (
                     <div className="print-page" key={pageIdx}>
-                        {pageCards.map((card, cardIdx) => {
-                            const serial = pageIdx * cardsPerPagePrint + cardIdx + 1
+                        {pageCards.map(card => (
+                            <div className="print-row" key={`print-${card.id}`}>
+                                {/* Front Card */}
+                                <div className="card-box front">
+                                    {/* USE STANDARD IMG TAG HERE */}
+                                    <img src="/ID_Card_Format/card-front.png" className="card-bg" alt="" />
 
-                            return (
-                                <div className="print-row" key={`print-${card.id}`}>
-                                    {/* Front Card */}
-                                    <div className="card-box front">
-                                        {/* USE STANDARD IMG TAG HERE */}
-                                        <img src="/Id_Card_Format/card-front.png" className="card-bg" alt="" />
-
-                                        {/* Printed ID/serial number */}
-                                        <span
-                                            style={{
-                                                position: "absolute",
-                                                top: "5%",
-                                                left: "5%",
-                                                fontSize: "10px",
-                                                fontWeight: "bold",
-                                                color: "#000",
-                                                zIndex: 10,
-                                            }}
-                                        >
-                                            ID: {serial}
-                                        </span>
-
-                                        <span className="val-name">{card.name}</span>
-                                        <span className="val-member">{card.membershipNo}</span>
-                                        <img src={card.photoUrl} className="val-photo" alt="" />
-                                    </div>
-
-                                    {/* Back Card */}
-                                    <div className="card-box back">
-                                        {/* USE STANDARD IMG TAG HERE */}
-                                        <img src="/Id_Card_Format/card-back.png" className="card-bg" alt="" />
-
-                                        <span className="val-b-name">{card.name}</span>
-                                        <span className="val-b-address">
-                                            {card.address}, {card.area}, {card.state}
-                                        </span>
-                                        {card.qrCode && (
-                                            <img src={card.qrCode.qrImageUrl} className="val-qr" alt="" />
-                                        )}
-                                    </div>
+                                    <span className="val-name">{card.name}</span>
+                                    <span className="val-member">{card.membershipNo}</span>
+                                    <img src={card.photoUrl} className="val-photo" alt="" />
                                 </div>
-                            )
-                        })}
+
+                                {/* Back Card */}
+                                <div className="card-box back">
+                                    {/* USE STANDARD IMG TAG HERE */}
+                                    <img src="/ID_Card_Format/card-back.png" className="card-bg" alt="" />
+
+                                    <span className="val-b-name">{card.name}</span>
+                                    <span className="val-b-address">
+                                        {card.address}, {card.area}, {card.state}
+                                    </span>
+                                    {card.qrCode && (
+                                        <img src={card.qrCode.qrImageUrl} className="val-qr" alt="" />
+                                    )}
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 ))}
             </div>
