@@ -23,7 +23,7 @@ export default async function Navbar() {
                 .navbar-inner {
                     max-width: 960px;
                     margin: 0 auto;
-                    padding: 0 24px;
+                    padding: 0 16px;
                     display: flex;
                     align-items: stretch;
                     justify-content: space-between;
@@ -143,6 +143,37 @@ export default async function Navbar() {
                         transparent 4px,
                         transparent 10px
                     );
+                }
+
+                /* ── Mobile navbar ── */
+                @media (max-width: 640px) {
+                    .navbar-inner {
+                        padding: 0 10px;
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 4px;
+                    }
+                    .navbar-links {
+                        margin-top: 4px;
+                        flex-wrap: wrap;
+                    }
+                    .navbar-link {
+                        padding: 6px 10px;
+                        font-size: 10px;
+                    }
+                    .navbar-user {
+                        width: 100%;
+                        border-left: none;
+                        border-top: 1px solid #52422e;
+                        margin-left: 0;
+                        margin-top: 4px;
+                        padding: 4px 0 6px;
+                        justify-content: space-between;
+                    }
+                    .navbar-email {
+                        max-width: 140px;
+                        font-size: 9px;
+                    }
                 }
             `}</style>
 
