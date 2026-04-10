@@ -26,6 +26,7 @@ model User {
 model IdCard {
   id           String   @id @default(cuid())
   name         String
+  designation  String?
   address      String
   area         String
   mobileNo     String

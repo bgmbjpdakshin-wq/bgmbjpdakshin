@@ -19,7 +19,15 @@ function NewIdCardForm() {
   const [error, setError] = useState("")
 
   const [formDataState, setFormDataState] = useState({
-    name: "", mobileNo: "", address: "", area: "", state: "", constituency: "", membershipNo: "", qrIdNo: ""
+    name: "",
+    mobileNo: "",
+    designation: "",
+    address: "",
+    area: "",
+    state: "",
+    constituency: "Belagavi dakshin",
+    membershipNo: "",
+    qrIdNo: "",
   })
 
   useEffect(() => {
@@ -27,13 +35,19 @@ function NewIdCardForm() {
       if (editId) {
         const record = await getIdCardById(editId)
         if (record) {
+          const designation =
+            "designation" in record
+              ? ((record as { designation?: string | null }).designation ?? "")
+              : ""
+
           setFormDataState({
             name: record.name,
             mobileNo: record.mobileNo,
+            designation,
             address: record.address,
             area: record.area,
             state: record.state,
-            constituency: record.constituency,
+            constituency: record.constituency || "Belagavi dakshin",
             membershipNo: record.membershipNo,
             qrIdNo: record.qrIdNo // Or how you retrieve this from your schema
           })
@@ -474,6 +488,18 @@ function NewIdCardForm() {
                       value={formDataState.mobileNo}
                       onChange={handleChange}
                       required
+                    />
+                  </div>
+
+                  <div className="newid-field">
+                    <label htmlFor="designation">Designation (Optional)</label>
+                    <input
+                      id="designation"
+                      type="text"
+                      name="designation"
+                      placeholder="e.g. Booth President"
+                      value={formDataState.designation}
+                      onChange={handleChange}
                     />
                   </div>
 
