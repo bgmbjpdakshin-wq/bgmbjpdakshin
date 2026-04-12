@@ -24,7 +24,7 @@ function NewIdCardForm() {
     designation: "",
     address: "",
     area: "",
-    state: "",
+    state: "Karnataka",
     constituency: "Belagavi dakshin",
     membershipNo: "",
     qrIdNo: "",
