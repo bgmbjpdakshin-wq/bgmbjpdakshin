@@ -246,7 +246,7 @@ export default function IdCardsClient({
 
                     .val-name { position: absolute; top: 57%; left: 32.5%; font-size: 12px; font-weight: bold; color: #4B0082; z-index: 10; }
                     .val-designation { position: absolute; top: 69%; left: 32.5%; font-size: 10px; font-weight: 600; color: #4B0082; z-index: 10; }
-                    .val-member { position: absolute; top: 80.5%; left: 45%; font-size: 11px; font-weight: bold; color: #000; z-index: 10; }
+                    .val-member { position: absolute; top: 80%; left: 34%; font-size: 11px; font-weight: bold; color: #000; z-index: 10; }
                     .val-photo { position: absolute; top: 35.5%; left: 69.8%; width: 26%; height: 57.5%; object-fit: cover; z-index: 10; border: 1px solid #3a2e22; box-sizing: border-box; }
 
                     .val-b-name { position: absolute; top: 60.5%; left: 24%; font-size: 11px; font-weight: 700; color: #4B0082; z-index: 10; }
@@ -489,19 +489,7 @@ export default function IdCardsClient({
                                         <img src="/Id_Card_Format/card-front.png" className="card-bg" alt="" />
 
                                         {/* Printed ID/serial number */}
-                                        <span
-                                            style={{
-                                                position: "absolute",
-                                                top: "5%",
-                                                left: "5%",
-                                                fontSize: "10px",
-                                                fontWeight: "bold",
-                                                color: "#000",
-                                                zIndex: 10,
-                                            }}
-                                        >
-                                            ID: {serial}
-                                        </span>
+                                        
 
                                         <span className="val-name">{card.name}</span>
 

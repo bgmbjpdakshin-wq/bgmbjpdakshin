@@ -23,7 +23,7 @@ export async function createIdCard(formData: FormData) {
   const state = formData.get("state") as string
   const constituency = formData.get("constituency") as string
   const membershipNo = formData.get("membershipNo") as string
-  const qrIdNo = formData.get("qrIdNo") as string
+  const qrIdNo = await getNextQrIdNo()
   const photoBase64 = formData.get("photoBase64") as string
 
   if (!photoBase64) throw new Error("Webcam photo is required")
@@ -167,4 +167,33 @@ export async function deleteIdCardAction(formData: FormData) {
   } catch (error) {
     console.error("Failed to delete ID card:", error)
   }
+}
+
+async function getNextQrIdNo(): Promise<string> {
+  const prefix = "BJPBGMDAK";
+  
+  const lastQr = await prisma.qrCode.findFirst({
+    where: {
+      qrIdNo: { startsWith: prefix },
+    },
+    orderBy: {
+      qrIdNo: 'desc',
+    },
+  });
+
+  if (!lastQr) {
+    return `${prefix}001001`;
+  }
+
+  const lastNumberStr = lastQr.qrIdNo.replace(prefix, "");
+  const lastNumber = parseInt(lastNumberStr, 10);
+
+  if (isNaN(lastNumber)) {
+    return `${prefix}001001`;
+  }
+
+  const nextNumber = lastNumber + 1;
+  const nextNumberStr = nextNumber.toString().padStart(6, '0');
+
+  return `${prefix}${nextNumberStr}`;
 }

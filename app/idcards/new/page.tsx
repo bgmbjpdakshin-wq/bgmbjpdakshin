@@ -574,10 +574,11 @@ function NewIdCardForm() {
                         id="qrIdNo"
                         type="text"
                         name="qrIdNo"
-                        placeholder="QR-0001"
+                        placeholder={editId ? "" : "Auto-generated upon save"}
                         value={formDataState.qrIdNo}
                         onChange={handleChange}
-                        required
+                        readOnly={true}
+                        className={editId ? "" : "opacity-70 cursor-not-allowed"}
                       />
                     </div>
                   </div>
