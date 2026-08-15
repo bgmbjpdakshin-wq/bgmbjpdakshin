@@ -18,6 +18,7 @@ export async function createIdCard(formData: FormData) {
   const designationRaw = formData.get("designation") as string | null
   const designation = designationRaw?.trim() ? designationRaw.trim() : null
   const address = formData.get("address") as string
+  const wardNo = formData.get("wardNo") as string
   const area = formData.get("area") as string
   const mobileNo = formData.get("mobileNo") as string
   const state = formData.get("state") as string
@@ -45,7 +46,7 @@ export async function createIdCard(formData: FormData) {
 
     await prisma.idCard.create({
       data: {
-        name, designation, address, area, mobileNo, state, constituency, membershipNo,
+        name, designation, address, wardNo, area, mobileNo, state, constituency, membershipNo,
         photoUrl: photoUpload.url,
         createdBy: {
           connect: { email: employeeEmail }
@@ -100,6 +101,7 @@ export async function updateIdCard(formData: FormData) {
   const designationRaw = formData.get("designation") as string | null
   const designation = designationRaw?.trim() ? designationRaw.trim() : null
   const address = formData.get("address") as string
+  const wardNo = formData.get("wardNo") as string
   const area = formData.get("area") as string
   const mobileNo = formData.get("mobileNo") as string
   const state = formData.get("state") as string
@@ -129,7 +131,7 @@ export async function updateIdCard(formData: FormData) {
     })
 
     const updateData: any = {
-      name, designation, address, area, mobileNo, state, constituency, membershipNo,
+      name, designation, address, wardNo, area, mobileNo, state, constituency, membershipNo,
       qrCode: {
         update: {
           qrIdNo,
