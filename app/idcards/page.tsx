@@ -9,13 +9,17 @@ export default async function IdCardsListPage({
     searchParams: Promise<{ query?: string; page?: string; limit?: string }> 
 }) {
     const resolvedParams = await searchParams
+    const session = await auth()
+    if(!session?.user){
+        redirect("/login")
+    }
     const query = resolvedParams?.query || ""
     const currentPage = Number(resolvedParams?.page) || 1
     const limit = Number(resolvedParams?.limit) || 10
     
     const ITEMS_PER_PAGE = limit
 
-    const where = query
+    const searchFilter = query
         ? {
               OR: [
                   { name: { contains: query, mode: "insensitive" as const } },
@@ -24,6 +28,15 @@ export default async function IdCardsListPage({
               ],
           }
         : {}
+
+    const isAdmin = (session.user as any).role ==="ADMIN"
+
+    const where = isAdmin
+          ? searchFilter
+          : {
+                ...searchFilter,
+                creatorId: (session.user as any).id,
+          }
     
     const hasDatabase = !!process.env.DATABASE_URL
 
