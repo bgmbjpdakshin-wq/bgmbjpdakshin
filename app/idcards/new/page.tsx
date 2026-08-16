@@ -23,6 +23,7 @@ function NewIdCardForm() {
     mobileNo: "",
     designation: "",
     address: "",
+    wardNo: "",
     area: "",
     state: "Karnataka",
     constituency: "Belagavi dakshin",
@@ -45,7 +46,8 @@ function NewIdCardForm() {
             mobileNo: record.mobileNo,
             designation,
             address: record.address,
-            area: record.area,
+            wardNo: record.wardNo,
+            area: record.area,          
             state: record.state,
             constituency: record.constituency || "Belagavi dakshin",
             membershipNo: record.membershipNo,
@@ -514,7 +516,18 @@ function NewIdCardForm() {
                       required
                     />
                   </div>
-
+                  <div className="newid-field">
+                      <label htmlFor="wardNo">Ward No.</label>
+                      <input
+                        id="wardNo"
+                        type="text"
+                        name="wardNo"
+                        placeholder="Ward No."
+                        value={formDataState.wardNo}
+                        onChange={handleChange}
+                        required
+                    />
+                    </div>
                   <div className="newid-two-col">
                     <div className="newid-field">
                       <label htmlFor="area">Area</label>

@@ -28,6 +28,7 @@ model IdCard {
   name         String
   designation  String?
   address      String
+  wardNo       String
   area         String
   mobileNo     String
   state        String
