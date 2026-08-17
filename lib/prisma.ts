@@ -2,8 +2,10 @@ import { PrismaClient } from '@prisma/client'
 import { PrismaNeon } from '@prisma/adapter-neon'
 
 const prismaClientSingleton = () => {
-  const connectionString = process.env.DATABASE_URL!
-  
+  const connectionString = process.env.DATABASE_URL
+  if (!connectionString) {
+    return new PrismaClient()
+  }
   const adapter = new PrismaNeon({ connectionString })
   return new PrismaClient({ adapter })
 }

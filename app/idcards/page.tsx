@@ -3,6 +3,8 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import IdCardsClient from "@/components/IdCardsClient"
 
+export const dynamic = "force-dynamic"
+
 export default async function IdCardsListPage({
     searchParams,
 }: {
