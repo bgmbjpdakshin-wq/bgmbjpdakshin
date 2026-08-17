@@ -4,6 +4,7 @@ import Link from "next/link"
 import DeleteButton from "@/components/DeleteButton"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { useState, useEffect } from "react"
+import { exportCardsAsZip } from "@/lib/exportCards"
 
 export default function IdCardsClient({
     idCards,
@@ -28,6 +29,11 @@ export default function IdCardsClient({
     const [showPrintChoice, setShowPrintChoice] = useState(false)
     const [printWithDesignation, setPrintWithDesignation] = useState(false)
     const [printTriggered, setPrintTriggered] = useState(false)
+
+    // Export ZIP state
+    const [showExportChoice, setShowExportChoice] = useState(false)
+    const [isExporting, setIsExporting] = useState(false)
+    const [exportProgress, setExportProgress] = useState({ current: 0, total: 0 })
 
     useEffect(() => {
         if (printTriggered) {
@@ -84,8 +90,44 @@ export default function IdCardsClient({
     const handlePrintChoice = (withDesignation: boolean) => {
         setPrintWithDesignation(withDesignation)
         setShowPrintChoice(false)
-
         setPrintTriggered(true)
+    }
+
+    const handleExport = () => {
+        setShowExportChoice(true)
+    }
+
+    const handleExportChoice = async (withDesignation: boolean) => {
+        setShowExportChoice(false)
+        setIsExporting(true)
+        setExportProgress({ current: 0, total: 0 })
+
+        try {
+            // Fetch ALL cards from the server (ignores pagination)
+            const res = await fetch("/api/idcards/export")
+            if (!res.ok) throw new Error("Failed to fetch cards for export")
+            const { idCards: allCards } = await res.json()
+
+            // If user has selected specific cards, filter to those; otherwise export all
+            const cardsToExport =
+                selectedIds.size > 0
+                    ? allCards.filter((c: any) => selectedIds.has(c.id))
+                    : allCards
+
+            setExportProgress({ current: 0, total: cardsToExport.length })
+
+            await exportCardsAsZip(
+                cardsToExport,
+                withDesignation,
+                (current, total) => setExportProgress({ current, total })
+            )
+        } catch (err) {
+            console.error("Export failed:", err)
+            alert("Export failed. Please try again.")
+        } finally {
+            setIsExporting(false)
+            setExportProgress({ current: 0, total: 0 })
+        }
     }
 
     return (
@@ -167,6 +209,53 @@ export default function IdCardsClient({
                     background: transparent;
                     color: #3a2e22;
                 }
+
+                /* ── Export progress overlay ── */
+                .export-progress-backdrop {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0,0,0,0.55);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                    padding: 16px;
+                }
+                .export-progress-modal {
+                    width: 100%;
+                    max-width: 380px;
+                    background: #f5efe4;
+                    border: 2px solid #3a2e22;
+                    box-shadow: 6px 6px 0 #3a2e22;
+                    padding: 24px 28px;
+                    text-align: center;
+                }
+                .export-progress-title {
+                    font-size: 12px;
+                    font-weight: 700;
+                    letter-spacing: 0.14em;
+                    text-transform: uppercase;
+                    color: #3a2e22;
+                    margin-bottom: 16px;
+                }
+                .export-progress-bar-wrap {
+                    width: 100%;
+                    height: 6px;
+                    background: #d4c9b4;
+                    margin-bottom: 12px;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .export-progress-bar {
+                    height: 100%;
+                    background: #3a2e22;
+                    transition: width 0.2s ease;
+                }
+                .export-progress-count {
+                    font-size: 12px;
+                    color: #5a4a32;
+                    letter-spacing: 0.06em;
+                }
                 .idlist-table-wrap { background-color: #f5efe4; border: 2px solid #3a2e22; box-shadow: 5px 5px 0 #3a2e22; overflow-x: auto; margin-bottom: 20px; }
                 table.idlist-table { width: 100%; border-collapse: collapse; font-family: 'Courier Prime', monospace; font-size: 13px; }
                 .idlist-table thead { background-color: #3a2e22; }
@@ -204,9 +293,16 @@ export default function IdCardsClient({
                 .page-btn[disabled] { opacity: 0.5; pointer-events: none; }
                 .page-btn:hover:not([disabled]) { background: #3a2e22; color: #e8dfc8; }
 
-                /* Hide Print Layout on Screen */
+                /* Hide Print Layout on Screen but keep in DOM and off-screen for eager asset preloading */
                 @media screen {
-                    .print-layout { display: none; }
+                    .print-layout {
+                        position: absolute;
+                        left: -9999px;
+                        top: -9999px;
+                        width: 0;
+                        height: 0;
+                        overflow: hidden;
+                    }
                 }
 
                 /* ── Mobile adjustments ── */
@@ -236,7 +332,15 @@ export default function IdCardsClient({
                     body * { visibility: hidden; }
                     
                     .print-layout, .print-layout * { visibility: visible; }
-                    .print-layout { position: absolute; left: 0; top: 0; width: 100%; font-family: sans-serif; }
+                    .print-layout {
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                        width: 100%;
+                        height: auto;
+                        overflow: visible;
+                        font-family: sans-serif;
+                    }
 
                     .print-page { display: flex; flex-direction: column; gap: 15px; page-break-after: always; align-items: center; padding-top: 10px; }
                     .print-row { display: flex; gap: 15px; }
@@ -244,58 +348,122 @@ export default function IdCardsClient({
                     .card-box { position: relative; width: 86mm; height: 54mm; border: 1px dashed #999; box-sizing: border-box; overflow: hidden; }
                     .card-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
 
-                    .val-name { position: absolute; top: 57%; left: 32.5%; font-size: 12px; font-weight: bold; color: #4B0082; z-index: 10; }
-                    .val-designation { position: absolute; top: 69%; left: 32.5%; font-size: 10px; font-weight: 600; color: #4B0082; z-index: 10; }
-                    .val-member { position: absolute; top: 80%; left: 34%; font-size: 11px; font-weight: bold; color: #000; z-index: 10; }
-                    .val-photo { position: absolute; top: 35.5%; left: 69.8%; width: 26%; height: 57.5%; object-fit: cover; z-index: 10; border: 1px solid #3a2e22; box-sizing: border-box; }
-
-                    .val-b-name { position: absolute; top: 60.5%; left: 24%; font-size: 11px; font-weight: 700; color: #4B0082; z-index: 10; }
-                    .val-b-designation {
+                    .card-info-front {
                         position: absolute;
-                        top: 66.2%;
-                        left: 24%;
-                        width: 50%;
-                        font-size: 9px;
-                        color: #2a1e12;
-                        z-index: 10;
+                        top: 54%;
+                        left: 4%;
+                        width: 62%;
                         display: flex;
-                        gap: 3px;
-                        align-items: baseline;
+                        flex-direction: column;
+                        gap: 2.5px;
+                        font-family: Arial, Helvetica, sans-serif;
+                        z-index: 20;
                     }
-                    .val-b-designation-label {
-                        font-weight: 700;
-                        color: #4B0082;
-                    }
-                    .val-b-address {
+                    .card-info-back {
                         position: absolute;
-                        top: 70.4%;
-                        left: 24%;
-                        width: 50%;
-                        font-size: 9.5px;
-                        color: #1f1a14;
-                        line-height: 1.2;
-                        white-space: pre-line;
-                        z-index: 10;
+                        top: 61%;
+                        left: 4%;
+                        width: 68%;
                         display: flex;
-                        gap: 6px;
+                        flex-direction: column;
+                        gap: 2px;
+                        font-family: Arial, Helvetica, sans-serif;
+                        z-index: 20;
+                    }
+                    .card-info-row {
+                        display: flex;
+                        align-items: center;
+                        font-size: 8pt;
+                        line-height: 1.35;
+                        white-space: nowrap;
+                    }
+                    .card-info-row.address-row {
                         align-items: flex-start;
+                        white-space: normal;
                     }
-                    .val-b-address.with-designation { top: 74.4%; }
-                    .val-b-address-label {
-                        min-width: 36px;
+                    .card-info-label {
+                        min-width: 28mm;
+                        flex-shrink: 0;
+                        font-weight: 800;
+                        color: #1a1008;
+                        text-shadow: 0 0 0 #1a1008;
+                    }
+                    .card-info-label.back-lbl {
+                        min-width: 21mm;
+                    }
+                    .card-info-val {
+                        overflow: hidden;
+                        text-overflow: ellipsis;
                         font-weight: 700;
-                        color: #2a1e12;
+                        text-shadow: 0 0 0 currentColor;
                     }
-                    .val-b-address-text {
-                        flex: 1;
-                        word-wrap: break-word;
-                    }
-                    .val-qr { position: absolute; top: 58%; right: 4%; width: 20%; aspect-ratio: 1; background: #fff; padding: 2px; border-radius: 4px; z-index: 10; }
+
+                    .val-photo { position: absolute; top: 35.5%; left: 69.8%; width: 26%; height: 57.5%; object-fit: cover; z-index: 15; border: 1px solid #3a2e22; box-sizing: border-box; }
+                    .val-qr { position: absolute; top: 58%; right: 4%; width: 20%; aspect-ratio: 1; background: #fff; padding: 2px; border-radius: 4px; z-index: 15; }
                 }
             `}</style>
 
             <div className="idlist-root no-print">
                 <div className="idlist-inner">
+                    {/* Export choice modal */}
+                    {showExportChoice && (
+                        <div className="print-choice-backdrop">
+                            <div className="print-choice-modal">
+                                <p className="print-choice-title">Export Preference</p>
+                                <p className="print-choice-subtitle">
+                                    Export ID cards with designation on the back, or without?
+                                </p>
+                                <div className="print-choice-actions">
+                                    <button
+                                        type="button"
+                                        className="print-choice-btn"
+                                        onClick={() => handleExportChoice(true)}
+                                    >
+                                        With Designation
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="print-choice-btn secondary"
+                                        onClick={() => handleExportChoice(false)}
+                                    >
+                                        Without Designation
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="print-choice-btn secondary"
+                                        onClick={() => setShowExportChoice(false)}
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Export progress overlay */}
+                    {isExporting && (
+                        <div className="export-progress-backdrop">
+                            <div className="export-progress-modal">
+                                <p className="export-progress-title">⬇ Generating ZIP…</p>
+                                <div className="export-progress-bar-wrap">
+                                    <div
+                                        className="export-progress-bar"
+                                        style={{
+                                            width: exportProgress.total > 0
+                                                ? `${(exportProgress.current / exportProgress.total) * 100}%`
+                                                : "0%"
+                                        }}
+                                    />
+                                </div>
+                                <p className="export-progress-count">
+                                    {exportProgress.total > 0
+                                        ? `Processing card ${exportProgress.current} of ${exportProgress.total}`
+                                        : "Fetching cards…"}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     {showPrintChoice && (
                         <div className="print-choice-backdrop">
                             <div className="print-choice-modal">
@@ -365,13 +533,25 @@ export default function IdCardsClient({
                         </div>
                         <div className="header-actions">
                             {idCards.length > 0 && (
-                                <button
-                                    onClick={handlePrint}
-                                    className="idlist-create-btn"
-                                    style={{ backgroundColor: "#5a4a32", borderColor: "#5a4a32" }}
-                                >
-                                    {selectedIds.size > 0 ? `Print Selected (${selectedIds.size})` : "Print ID Cards"}
-                                </button>
+                                <>
+                                    <button
+                                        onClick={handleExport}
+                                        className="idlist-create-btn"
+                                        disabled={isExporting}
+                                        style={{ backgroundColor: "#574B35", borderColor: "#574B35", opacity: isExporting ? 0.5 : 1, cursor: isExporting ? "not-allowed" : "pointer" }}
+                                    >
+                                        {selectedIds.size > 0
+                                            ? `⬇ Export Selected (${selectedIds.size})`
+                                            : "⬇ Export ZIP"}
+                                    </button>
+                                    <button
+                                        onClick={handlePrint}
+                                        className="idlist-create-btn"
+                                        style={{ backgroundColor: "#5a4a32", borderColor: "#5a4a32" }}
+                                    >
+                                        {selectedIds.size > 0 ? `Print Selected (${selectedIds.size})` : "Print ID Cards"}
+                                    </button>
+                                </>
                             )}
                             <Link href="/idcards/new" className="idlist-create-btn">
                                 + Create New ID Card
@@ -484,37 +664,57 @@ export default function IdCardsClient({
 
                             return (
                                 <div className="print-row" key={`print-${card.id}`}>
-                                    {/* Front Card */}
-                                    <div className="card-box front">
-                                        <img src="/Id_Card_Format/card-front.png" className="card-bg" alt="" />
+                                     {/* Front Card */}
+                                     <div className="card-box front">
+                                         <img src="/ID_Card_Format/card-front.png" className="card-bg" alt="" />
 
-                                        {/* Printed ID/serial number */}
-                                        
+                                         <div className="card-info-front">
+                                             <div className="card-info-row">
+                                                 <span className="card-info-label">Name :</span>
+                                                 <span className="card-info-val" style={{ fontWeight: 700, color: "#4B0082" }}>{card.name}</span>
+                                             </div>
+                                             <div className="card-info-row">
+                                                 <span className="card-info-label">State :</span>
+                                                 <span className="card-info-val" style={{ fontWeight: 600, color: "#1f1a14" }}>{card.state || "Karnataka"}</span>
+                                             </div>
+                                             <div className="card-info-row">
+                                                 <span className="card-info-label">Constituency :</span>
+                                                 <span className="card-info-val" style={{ fontWeight: 600, color: "#1f1a14" }}>{card.constituency || "Belagavi Dakshin"}</span>
+                                             </div>
+                                             <div className="card-info-row">
+                                                 <span className="card-info-label">Membership No. :</span>
+                                                 <span className="card-info-val" style={{ fontWeight: 700, color: "#000000" }}>{card.membershipNo}</span>
+                                             </div>
+                                         </div>
 
-                                        <span className="val-name">{card.name}</span>
+                                         <img src={card.photoUrl} className="val-photo" alt="" />
+                                     </div>
 
-                                        <span className="val-member">{card.membershipNo}</span>
-                                        <img src={card.photoUrl} className="val-photo" alt="" />
-                                    </div>
+                                     {/* Back Card */}
+                                     <div className="card-box back">
+                                         <img src="/ID_Card_Format/card-back.png" className="card-bg" alt="" />
 
-                                    {/* Back Card */}
-                                    <div className="card-box back">
-                                        <img src="/Id_Card_Format/card-back.png" className="card-bg" alt="" />
+                                         <div className="card-info-back">
+                                             <div className="card-info-row">
+                                                 <span className="card-info-label back-lbl">Name :</span>
+                                                 <span className="card-info-val" style={{ fontWeight: 700, color: "#4B0082" }}>{card.name}</span>
+                                             </div>
+                                             {printWithDesignation && card.designation && (
+                                                 <div className="card-info-row">
+                                                     <span className="card-info-label back-lbl" style={{ color: "#4B0082" }}>Designation :</span>
+                                                     <span className="card-info-val" style={{ color: "#2a1e12" }}>{card.designation}</span>
+                                                 </div>
+                                             )}
+                                             <div className="card-info-row address-row">
+                                                 <span className="card-info-label back-lbl">Address :</span>
+                                                 <span className="card-info-val" style={{ color: "#1f1a14" }}>{`${card.address}, ${card.area}, ${card.state}`}</span>
+                                             </div>
+                                         </div>
 
-                                        <span className="val-b-name">{card.name}</span>
-                                        {printWithDesignation && card.designation && (
-                                            <span className="val-b-designation mb-5">
-                                                <span className="val-b-designation-label mb-4">Designation:</span>
-                                                <span>{card.designation}</span>
-                                            </span>
-                                        )}
-                                        <span className={`val-b-address ${printWithDesignation ? " mt-4" : ""}`}>
-                                            <span className="val-b-address-text">{`${card.address}, ${card.area}, ${card.state}`}</span>
-                                        </span>
-                                        {card.qrCode && (
-                                            <img src={card.qrCode.qrImageUrl} className="val-qr" alt="" />
-                                        )}
-                                    </div>
+                                         {card.qrCode && (
+                                             <img src={card.qrCode.qrImageUrl} className="val-qr" alt="" />
+                                         )}
+                                     </div>
                                 </div>
                             )
                         })}

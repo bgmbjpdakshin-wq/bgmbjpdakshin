@@ -9,17 +9,13 @@ export default async function IdCardsListPage({
     searchParams: Promise<{ query?: string; page?: string; limit?: string }> 
 }) {
     const resolvedParams = await searchParams
-    const session = await auth()
-    if(!session?.user){
-        redirect("/login")
-    }
     const query = resolvedParams?.query || ""
     const currentPage = Number(resolvedParams?.page) || 1
     const limit = Number(resolvedParams?.limit) || 10
     
     const ITEMS_PER_PAGE = limit
 
-    const searchFilter = query
+    const where = query
         ? {
               OR: [
                   { name: { contains: query, mode: "insensitive" as const } },
@@ -28,15 +24,6 @@ export default async function IdCardsListPage({
               ],
           }
         : {}
-
-    const isAdmin = (session.user as any).role ==="ADMIN"
-
-    const where = isAdmin
-          ? searchFilter
-          : {
-                ...searchFilter,
-                creatorId: (session.user as any).id,
-          }
     
     const hasDatabase = !!process.env.DATABASE_URL
 
@@ -77,7 +64,7 @@ export default async function IdCardsListPage({
                     constituency: "Belagavi dakshin",
                     membershipNo: "1001",
                     designation: "President",
-                    photoUrl: "/Id_Card_Format/card-front.png",
+                    photoUrl: "/ID_Card_Format/card-front.png",
                     qrCode: null,
                 },
                 {
@@ -90,7 +77,7 @@ export default async function IdCardsListPage({
                     constituency: "Belagavi dakshin",
                     membershipNo: "1002",
                     designation: "President",
-                    photoUrl: "/Id_Card_Format/card-front.png",
+                    photoUrl: "/ID_Card_Format/card-front.png",
                     qrCode: null,
                 },
             ]
@@ -107,7 +94,7 @@ export default async function IdCardsListPage({
                 state: "Sample State",
                 constituency: "Sample Constituency",
                 membershipNo: "1001",
-                photoUrl: "/Id_Card_Format/card-front.png",
+                photoUrl: "/ID_Card_Format/card-front.png",
                 qrCode: null,
             },
             {
@@ -119,7 +106,7 @@ export default async function IdCardsListPage({
                 state: "Sample State",
                 constituency: "Sample Constituency",
                 membershipNo: "1002",
-                photoUrl: "/Id_Card_Format/card-front.png",
+                photoUrl: "/ID_Card_Format/card-front.png",
                 qrCode: null,
             },
         ]
