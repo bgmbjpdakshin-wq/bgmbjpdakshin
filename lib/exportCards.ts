@@ -37,7 +37,7 @@ function waitForImages(el: HTMLElement): Promise<void> {
         }
       })
   )
-  return Promise.all(promises).then(() => {})
+  return Promise.all(promises).then(() => { })
 }
 
 /** Creates an off-screen container that html2canvas can reliably render. */
@@ -265,7 +265,7 @@ export async function exportCardsAsZip(
       height: CARD_H,
       backgroundColor: "#ffffff",
       logging: false,
-    })
+    } as any)
 
     document.body.removeChild(shell)
     return canvas.toDataURL("image/jpeg", 0.92).split(",")[1]
@@ -275,7 +275,7 @@ export async function exportCardsAsZip(
     const card = cards[i]
 
     const frontJpeg = await captureCard(createFrontEl(card))
-    const backJpeg  = await captureCard(createBackEl(card, withDesignation))
+    const backJpeg = await captureCard(createBackEl(card, withDesignation))
 
     // Folder: membershipNo_Name  (safe for all filesystems)
     const safeName = card.name.replace(/[^a-zA-Z0-9\u0900-\u097F]/g, "_")
