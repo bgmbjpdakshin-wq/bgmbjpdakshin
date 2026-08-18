@@ -299,10 +299,12 @@ export default function IdCardsClient({
                         position: absolute;
                         left: -9999px;
                         top: -9999px;
-                        width: 0;
-                        height: 0;
+                        width: 1px;        /* Give it a physical dimension */
+                        height: 1px;       /* Give it a physical dimension */
+                        opacity: 0.01;     /* Keep it invisible */
                         overflow: hidden;
-                    }
+                        pointer-events: none; /* Prevent accidental clicks */
+                        }
                 }
 
                 /* ── Mobile adjustments ── */
