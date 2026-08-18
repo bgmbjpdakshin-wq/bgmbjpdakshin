@@ -63,6 +63,7 @@ function makeOffscreenShell(): { shell: HTMLElement; card: HTMLElement } {
 
 function makeBg(src: string): HTMLImageElement {
   const img = document.createElement("img")
+  img.crossOrigin="anonymous"
   img.src = src
   img.style.cssText =
     "position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0;"
@@ -138,11 +139,12 @@ function createFrontEl(card: any): HTMLElement {
   wrap.appendChild(infoContainer)
 
   // Photo  (top:35.5%→72px, left:69.8%→227px, w:85px, h:117px)
-  const photo = document.createElement("div")
+  const photo = document.createElement("img")
+  photo.crossOrigin="anonymous"
+  photo.src=card.photoUrl
   photo.style.cssText =
     "position:absolute;top:72px;left:227px;width:85px;height:117px;" +
-    `background-image:url('${card.photoUrl}');` +
-    "background-size:cover;background-position:center;background-repeat:no-repeat;" +
+    "object-fit:cover;" +
     "border:1px solid #3a2e22;box-sizing:border-box;z-index:15;"
   wrap.appendChild(photo)
 
