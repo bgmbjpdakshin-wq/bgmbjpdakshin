@@ -138,12 +138,12 @@ function createFrontEl(card: any): HTMLElement {
   wrap.appendChild(infoContainer)
 
   // Photo  (top:35.5%→72px, left:69.8%→227px, w:85px, h:117px)
-  const photo = document.createElement("img")
-  photo.src = card.photoUrl
-  photo.crossOrigin = "anonymous"
+  const photo = document.createElement("div")
   photo.style.cssText =
     "position:absolute;top:72px;left:227px;width:85px;height:117px;" +
-    "object-fit:cover;border:1px solid #3a2e22;box-sizing:border-box;z-index:15;"
+    `background-image:url('${card.photoUrl}');` +
+    "background-size:cover;background-position:center;background-repeat:no-repeat;" +
+    "border:1px solid #3a2e22;box-sizing:border-box;z-index:15;"
   wrap.appendChild(photo)
 
   return shell
