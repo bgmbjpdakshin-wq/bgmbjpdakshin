@@ -299,10 +299,12 @@ export default function IdCardsClient({
                         position: absolute;
                         left: -9999px;
                         top: -9999px;
-                        width: 0;
-                        height: 0;
+                        width: 1px;        /* Give it a physical dimension */
+                        height: 1px;       /* Give it a physical dimension */
+                        opacity: 0.01;     /* Keep it invisible */
                         overflow: hidden;
-                    }
+                        pointer-events: none; /* Prevent accidental clicks */
+                        }
                 }
 
                 /* ── Mobile adjustments ── */
@@ -534,16 +536,23 @@ export default function IdCardsClient({
                         <div className="header-actions">
                             {idCards.length > 0 && (
                                 <>
+
                                     <button
                                         onClick={handleExport}
                                         className="idlist-create-btn"
                                         disabled={isExporting}
-                                        style={{ backgroundColor: "#574B35", borderColor: "#574B35", opacity: isExporting ? 0.5 : 1, cursor: isExporting ? "not-allowed" : "pointer" }}
+                                        style={{
+                                            backgroundColor: "#574B35",
+                                            borderColor: "#574B35",
+                                            opacity: isExporting ? 0.5 : 1,
+                                            cursor: isExporting ? "not-allowed" : "pointer"
+                                        }}
                                     >
                                         {selectedIds.size > 0
                                             ? `⬇ Export Selected (${selectedIds.size})`
                                             : "⬇ Export ZIP"}
                                     </button>
+
                                     <button
                                         onClick={handlePrint}
                                         className="idlist-create-btn"
@@ -664,57 +673,57 @@ export default function IdCardsClient({
 
                             return (
                                 <div className="print-row" key={`print-${card.id}`}>
-                                     {/* Front Card */}
-                                     <div className="card-box front">
-                                         <img src="/ID_Card_Format/card-front.png" className="card-bg" alt="" />
+                                    {/* Front Card */}
+                                    <div className="card-box front">
+                                        <img src="/ID_Card_Format/card-front.png" className="card-bg" alt="" loading="eager" />
 
-                                         <div className="card-info-front">
-                                             <div className="card-info-row">
-                                                 <span className="card-info-label">Name :</span>
-                                                 <span className="card-info-val" style={{ fontWeight: 700, color: "#4B0082" }}>{card.name}</span>
-                                             </div>
-                                             <div className="card-info-row">
-                                                 <span className="card-info-label">State :</span>
-                                                 <span className="card-info-val" style={{ fontWeight: 600, color: "#1f1a14" }}>{card.state || "Karnataka"}</span>
-                                             </div>
-                                             <div className="card-info-row">
-                                                 <span className="card-info-label">Constituency :</span>
-                                                 <span className="card-info-val" style={{ fontWeight: 600, color: "#1f1a14" }}>{card.constituency || "Belagavi Dakshin"}</span>
-                                             </div>
-                                             <div className="card-info-row">
-                                                 <span className="card-info-label">Membership No. :</span>
-                                                 <span className="card-info-val" style={{ fontWeight: 700, color: "#000000" }}>{card.membershipNo}</span>
-                                             </div>
-                                         </div>
+                                        <div className="card-info-front">
+                                            <div className="card-info-row">
+                                                <span className="card-info-label">Name :</span>
+                                                <span className="card-info-val" style={{ fontWeight: 700, color: "#4B0082" }}>{card.name}</span>
+                                            </div>
+                                            <div className="card-info-row">
+                                                <span className="card-info-label">State :</span>
+                                                <span className="card-info-val" style={{ fontWeight: 600, color: "#1f1a14" }}>{card.state || "Karnataka"}</span>
+                                            </div>
+                                            <div className="card-info-row">
+                                                <span className="card-info-label">Constituency :</span>
+                                                <span className="card-info-val" style={{ fontWeight: 600, color: "#1f1a14" }}>{card.constituency || "Belagavi Dakshin"}</span>
+                                            </div>
+                                            <div className="card-info-row">
+                                                <span className="card-info-label">Membership No. :</span>
+                                                <span className="card-info-val" style={{ fontWeight: 700, color: "#000000" }}>{card.membershipNo}</span>
+                                            </div>
+                                        </div>
 
-                                         <img src={card.photoUrl} className="val-photo" alt="" />
-                                     </div>
+                                        <img src={card.photoUrl} className="val-photo" alt="" loading="eager" />
+                                    </div>
 
-                                     {/* Back Card */}
-                                     <div className="card-box back">
-                                         <img src="/ID_Card_Format/card-back.png" className="card-bg" alt="" />
+                                    {/* Back Card */}
+                                    <div className="card-box back">
+                                        <img src="/ID_Card_Format/card-back.png" className="card-bg" alt="" loading="eager" />
 
-                                         <div className="card-info-back">
-                                             <div className="card-info-row">
-                                                 <span className="card-info-label back-lbl">Name :</span>
-                                                 <span className="card-info-val" style={{ fontWeight: 700, color: "#4B0082" }}>{card.name}</span>
-                                             </div>
-                                             {printWithDesignation && card.designation && (
-                                                 <div className="card-info-row">
-                                                     <span className="card-info-label back-lbl" style={{ color: "#4B0082" }}>Designation :</span>
-                                                     <span className="card-info-val" style={{ color: "#2a1e12" }}>{card.designation}</span>
-                                                 </div>
-                                             )}
-                                             <div className="card-info-row address-row">
-                                                 <span className="card-info-label back-lbl">Address :</span>
-                                                 <span className="card-info-val" style={{ color: "#1f1a14" }}>{`${card.address}, ${card.area}, ${card.state}`}</span>
-                                             </div>
-                                         </div>
+                                        <div className="card-info-back">
+                                            <div className="card-info-row">
+                                                <span className="card-info-label back-lbl">Name :</span>
+                                                <span className="card-info-val" style={{ fontWeight: 700, color: "#4B0082" }}>{card.name}</span>
+                                            </div>
+                                            {printWithDesignation && card.designation && (
+                                                <div className="card-info-row">
+                                                    <span className="card-info-label back-lbl" style={{ color: "#4B0082" }}>Designation :</span>
+                                                    <span className="card-info-val" style={{ color: "#2a1e12" }}>{card.designation}</span>
+                                                </div>
+                                            )}
+                                            <div className="card-info-row address-row">
+                                                <span className="card-info-label back-lbl">Address :</span>
+                                                <span className="card-info-val" style={{ color: "#1f1a14" }}>{`${card.address}, ${card.area}, ${card.state}`}</span>
+                                            </div>
+                                        </div>
 
-                                         {card.qrCode && (
-                                             <img src={card.qrCode.qrImageUrl} className="val-qr" alt="" />
-                                         )}
-                                     </div>
+                                        {card.qrCode && (
+                                            <img src={card.qrCode.qrImageUrl} className="val-qr" alt="" loading="eager" />
+                                        )}
+                                    </div>
                                 </div>
                             )
                         })}

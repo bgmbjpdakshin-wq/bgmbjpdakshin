@@ -37,7 +37,7 @@ function waitForImages(el: HTMLElement): Promise<void> {
         }
       })
   )
-  return Promise.all(promises).then(() => {})
+  return Promise.all(promises).then(() => { })
 }
 
 /** Creates an off-screen container that html2canvas can reliably render. */
@@ -63,6 +63,7 @@ function makeOffscreenShell(): { shell: HTMLElement; card: HTMLElement } {
 
 function makeBg(src: string): HTMLImageElement {
   const img = document.createElement("img")
+  img.crossOrigin="anonymous"
   img.src = src
   img.style.cssText =
     "position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0;"
@@ -139,11 +140,12 @@ function createFrontEl(card: any): HTMLElement {
 
   // Photo  (top:35.5%→72px, left:69.8%→227px, w:85px, h:117px)
   const photo = document.createElement("img")
-  photo.src = card.photoUrl
-  photo.crossOrigin = "anonymous"
+  photo.crossOrigin="anonymous"
+  photo.src=card.photoUrl
   photo.style.cssText =
     "position:absolute;top:72px;left:227px;width:85px;height:117px;" +
-    "object-fit:cover;border:1px solid #3a2e22;box-sizing:border-box;z-index:15;"
+    "object-fit:cover;" +
+    "border:1px solid #3a2e22;box-sizing:border-box;z-index:15;"
   wrap.appendChild(photo)
 
   return shell
@@ -265,7 +267,7 @@ export async function exportCardsAsZip(
       height: CARD_H,
       backgroundColor: "#ffffff",
       logging: false,
-    })
+    } as any)
 
     document.body.removeChild(shell)
     return canvas.toDataURL("image/jpeg", 0.92).split(",")[1]
@@ -275,7 +277,7 @@ export async function exportCardsAsZip(
     const card = cards[i]
 
     const frontJpeg = await captureCard(createFrontEl(card))
-    const backJpeg  = await captureCard(createBackEl(card, withDesignation))
+    const backJpeg = await captureCard(createBackEl(card, withDesignation))
 
     // Folder: membershipNo_Name  (safe for all filesystems)
     const safeName = card.name.replace(/[^a-zA-Z0-9\u0900-\u097F]/g, "_")
