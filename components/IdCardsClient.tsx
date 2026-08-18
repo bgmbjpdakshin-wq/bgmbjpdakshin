@@ -536,16 +536,7 @@ export default function IdCardsClient({
                         <div className="header-actions">
                             {idCards.length > 0 && (
                                 <>
-                                    <button
-                                        onClick={handleExport}
-                                        className="idlist-create-btn"
-                                        disabled={isExporting}
-                                        style={{ backgroundColor: "#574B35", borderColor: "#574B35", opacity: isExporting ? 0.5 : 1, cursor: isExporting ? "not-allowed" : "pointer" }}
-                                    >
-                                        {selectedIds.size > 0
-                                            ? `⬇ Export Selected (${selectedIds.size})`
-                                            : "⬇ Export ZIP"}
-                                    </button>
+                                    
                                     <button
                                         onClick={handlePrint}
                                         className="idlist-create-btn"
@@ -668,7 +659,7 @@ export default function IdCardsClient({
                                 <div className="print-row" key={`print-${card.id}`}>
                                      {/* Front Card */}
                                      <div className="card-box front">
-                                         <img src="/ID_Card_Format/card-front.png" className="card-bg" alt="" />
+                                         <img src="/ID_Card_Format/card-front.png" className="card-bg" alt="" loading="eager" />
 
                                          <div className="card-info-front">
                                              <div className="card-info-row">
@@ -689,12 +680,12 @@ export default function IdCardsClient({
                                              </div>
                                          </div>
 
-                                         <img src={card.photoUrl} className="val-photo" alt="" />
+                                         <img src={card.photoUrl} className="val-photo" alt="" loading="eager" />
                                      </div>
 
                                      {/* Back Card */}
                                      <div className="card-box back">
-                                         <img src="/ID_Card_Format/card-back.png" className="card-bg" alt="" />
+                                         <img src="/ID_Card_Format/card-back.png" className="card-bg" alt="" loading="eager" />
 
                                          <div className="card-info-back">
                                              <div className="card-info-row">
@@ -714,7 +705,7 @@ export default function IdCardsClient({
                                          </div>
 
                                          {card.qrCode && (
-                                             <img src={card.qrCode.qrImageUrl} className="val-qr" alt="" />
+                                             <img src={card.qrCode.qrImageUrl} className="val-qr" alt="" loading="eager" />
                                          )}
                                      </div>
                                 </div>
